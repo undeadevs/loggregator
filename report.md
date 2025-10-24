@@ -1,4 +1,4 @@
-# UTS Sistem Terdistribusi dan Paralel: Pub-Sub Log Aggregator dengan Idempotent Consumer dan Deduplication
+# UTS Sistem Paralel dan Terdistribusi: Pub-Sub Log Aggregator dengan Idempotent Consumer dan Deduplication
 
 ## Identitas
 
