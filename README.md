@@ -2,6 +2,8 @@
 
 Pub-Sub Log Aggregator dengan Python untuk UTS Sistem Terdistibusi dan Paralel dari Ilham Al Basith dengan NIM 11221077
 
+![Diagram Arsitektur](architecture.svg)
+
 ## Asumsi
 
 - Semua komponen berjalan di lingkungan lokal
