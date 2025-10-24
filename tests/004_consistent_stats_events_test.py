@@ -84,16 +84,21 @@ async def test_consistent_stats_events(server):
         ])
         await publish_events_single(session, f"{endpoint}/publish", events)
         await asyncio.sleep(2.0)
-        res = await session.get(f"{endpoint}/stats")
-        res_data = await res.json()
+        stats_res = await session.get(f"{endpoint}/stats")
+        stats_data = await res.json()
         assert (
-            res_data["received"], 
-            res_data["unique_processed"], 
-            res_data["duplicate_dropped"], 
-            res_data["topics"]
+            stats_data["received"], 
+            stats_data["unique_processed"], 
+            stats_data["duplicate_dropped"], 
+            stats_data["topics"]
         ) == (
             5, 
             3, 
             2, 
             ["foo", "bar", "baz"]
         )
+        for i, topic in enumerate(stats_data["topics"]):
+            events_res = await session.get(f"{endpoint}/events?topic={topic}")
+            events_data = await events_res.json()
+            assert len(events_data) == 1
+            assert events_data[0]["event_id"]==events[i]["event_id"]
