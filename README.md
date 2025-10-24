@@ -1,6 +1,6 @@
 # Loggregator
 
-Pub-Sub Log Aggregator dengan Python untuk UTS Sistem Paralel dan Terdistibusi dari Ilham Al Basith dengan NIM 11221077
+Pub-Sub Log Aggregator dengan Python untuk UTS Sistem Paralel dan Terdistribusi dari Ilham Al Basith dengan NIM 11221077
 
 ![Diagram Arsitektur](architecture.svg)
 
