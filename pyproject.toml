@@ -1,0 +1,19 @@
+[project]
+name = "loggregator"
+version = "0.1"
+dependencies = [
+  "fastapi[standard]",
+  "uvicorn[standard]",
+  "aiosqlite",
+  "aiohttp",
+  "pytest",
+  "pytest-asyncio",
+  "python-dotenv",
+  "pytest-dotenv"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+log_cli = true
+log_cli_level = "INFO"
+env_files = ["src/aggregator/.env"]

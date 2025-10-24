@@ -1,0 +1,24 @@
+services:
+  aggregator:
+    image: undeadevs/loggregator-aggregator
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.aggregator
+    environment:
+        PYTHONPATH: src
+        HOST: 0.0.0.0
+        PORT: 8002
+        DB_PATH: ./data/dedup.db
+    ports:
+      - 8002:8002
+  publisher:
+    image: undeadevs/loggregator-publisher
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.publisher
+    environment:
+        PYTHONPATH: src
+        AGGREGATOR_HOST: aggregator
+        AGGREGATOR_PORT: 8002
+    depends_on:
+      - aggregator

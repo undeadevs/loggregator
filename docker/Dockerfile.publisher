@@ -1,0 +1,19 @@
+FROM python:3.13.9-slim
+
+WORKDIR /app
+
+RUN adduser --disabled-password --gecos '' appuser && chown -R appuser:appuser /app
+USER appuser
+
+COPY pyproject.toml ./
+RUN ["pip", "install", "-e", "."]
+
+COPY src/__init__.py ./src/
+COPY src/common/ ./src/common/
+COPY src/publisher/ ./src/publisher/
+
+ENV PYTHONPATH="src"
+ENV AGGREGATOR_HOST="0.0.0.0"
+ENV AGGREGATOR_PORT=8002
+
+CMD ["python", "-u", "./src/publisher/main.py"]
