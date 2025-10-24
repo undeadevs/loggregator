@@ -89,7 +89,7 @@ python ./src/publisher/main.py
 
 ## Endpoint
 
-- POST `/publish` dengan schema request body `{ "topic": string, "event_id": UUIDv4, "timestamp": ISO8601, "source": string, "payload": object }`
+- POST `/publish` dengan schema request body `{ "topic": string, "event_id": UUIDv4, "timestamp": ISO8601, "source": string, "payload": object }` atau dapat berupa array dari object tersebut (batched)
 - GET `/events` dengan query parameter wajib `topic`
 - GET `/stats` dengan schema response `{ "received": int, "unique_processed": int, "duplicate_dropped": int, "topics": string[], uptime: float }`
 
