@@ -21,7 +21,7 @@ env["DB_PATH"] = f"./{os.path.basename(__file__).removesuffix('.py')}.db"
 @pytest.fixture()
 def server():
     global env
-    process = subprocess.Popen([sys.executable, './src/aggregator/main.py'], env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen([sys.executable, './src/aggregator/main.py'], env=env, text=True)
     sleep(2.0)
 
     def _get_process():
@@ -56,7 +56,7 @@ async def test_persistent_dedup(server):
         process.terminate()
         process.wait()
         # rerun server process
-        process = subprocess.Popen([sys.executable, './src/aggregator/main.py'], env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen([sys.executable, './src/aggregator/main.py'], env=env, text=True)
         await asyncio.sleep(2.0)
         server["set"](process)
     async with aiohttp.ClientSession() as session:

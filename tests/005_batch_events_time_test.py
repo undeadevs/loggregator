@@ -17,7 +17,7 @@ env["DB_PATH"] = f"./{os.path.basename(__file__).removesuffix('.py')}.db"
 @pytest.fixture()
 def server():
     global env
-    process = subprocess.Popen([sys.executable, './src/aggregator/main.py'], env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen([sys.executable, './src/aggregator/main.py'], env=env, text=True)
     sleep(2.0)
 
     yield

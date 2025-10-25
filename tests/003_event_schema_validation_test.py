@@ -55,7 +55,6 @@ def test_event_schema_validation_invalid_topic():
         Event(**data)
     except ValidationError as e:
         errors = e.errors()
-    logger.info(errors[0])
     assert errors[0] == {
         "type": "string_pattern_mismatch", 
         "loc": ("topic",), 
