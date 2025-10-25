@@ -85,7 +85,7 @@ async def test_consistent_stats_events(server):
         await publish_events_single(session, f"{endpoint}/publish", events)
         await asyncio.sleep(2.0)
         stats_res = await session.get(f"{endpoint}/stats")
-        stats_data = await res.json()
+        stats_data = await stats_res.json()
         assert (
             stats_data["received"], 
             stats_data["unique_processed"], 
