@@ -14,11 +14,42 @@ Dalam sistem Pub-Sub Log Aggregator ini, service-service yang biasanya disebut P
 
 ## Keputusan Desain
 
-Keputusan desain aggregator mencakup alur proses antara publisher dan consumer, dedup store yang digunakan, penamaan `topic` dan `event_id`, dan teknik ordering. Alur di-desain agar publisher tidak menunggu hingga event diproses yang dimana server akan langsung mengirim response jika event yang dikirim telah masuk ke queue. Event dari queue akan di-consume dan di-deduplicate. Store yang digunakan untuk dedup adalah SQLite karena merupakan solusi file-based database yang telah matang. Penamaan `topic` hierarkikal yang dibatasi hingga 5 level seperti `a.b.c` dimana `b` adalah sub-topic dari `a` dan `c` adalah sub-topic dari `b`. Untuk menghidari collision, penamaan `event_id` menggunakan UUIDv4 yang dimana peluang collision-nya 1 dalam 2.71 * 10**18. Dengan asumsi bahwa maksud dari "lokal" dan "internal" adalah berjalan di satu host yang sama, ordering dilakukan dengan timestamp saja karena waktu pada container akan disinkronisasi terhadap host yang dimana container-container berjalan pada satu host saja.
+Keputusan desain aggregator mencakup alur proses antara publisher dan consumer, dedup store yang digunakan, penamaan `topic` dan `event_id`, dan teknik ordering. Aggregator di-desain untuk menerima single ataupun batched event. Alur di-desain agar publisher tidak menunggu hingga event diproses yang dimana server akan langsung mengirim response jika event yang dikirim telah masuk ke queue. Event dari queue akan di-consume dan di-deduplicate. Store yang digunakan untuk dedup adalah SQLite karena merupakan solusi file-based database yang telah matang. Penamaan `topic` hierarkikal yang dibatasi hingga 5 level seperti `a.b.c` dimana `b` adalah sub-topic dari `a` dan `c` adalah sub-topic dari `b`. Untuk menghidari collision, penamaan `event_id` menggunakan UUIDv4 yang dimana peluang collision-nya 1 dalam 2.71 * 10**18. Dengan asumsi bahwa maksud dari "lokal" dan "internal" adalah berjalan di satu host yang sama, ordering dilakukan dengan timestamp saja karena waktu pada container akan disinkronisasi terhadap host yang dimana container-container berjalan pada satu host saja.
 
 Selain itu, telah dibuat contoh service publisher yang di-desain untuk mengirimkan 5000 events dengan duplikasi lebih dari 20% terus menerus setiap 15-30 detik. Pengiriman secara random dapat berupa single event atau dapat berupa batched events. Perlu diperhatikan bahwa service ini tidak akan mati kecuali dimatikan secara eksplisit
 
 ## Analisis Performa dan Metrik
+
+***Cases**: 50,100,500,1000,5000,10000*
+*20.00% <= **Duplicate Rate** <= 100.00%* 
+
+*Catatan: Throughput dan Latency di sini diukur dari sisi publisher saja yaitu dari waktu request dikirim hingga response telah masuk queue**
+
+**Single**
+
+| Event Count | Elapsed (s)  | Throughput (event/s) | Latency (s/event) |
+| ----------- | ------------ | -------------------- | ----------------- |
+| 50          | 0.0449380875 | 1112.0               | 0.0008987617      |
+| 100         | 0.0855674744 | 1168.0               | 0.0008556747      |
+| 500         | 0.4417712688 | 1131.0               | 0.0008835425      |
+| 1000        | 0.9103057384 | 1098.0               | 0.0009103057      |
+| 5000        | 4.3617818356 | 1146.0               | 0.0008723564      |
+| 10000       | 8.4676251411 | 1180.0               | 0.0008467625      |
+| **Average** | -            | **1139.0**           | **0.0008779006**  |
+
+**Batched**
+
+| Event Count | Elapsed (s)  | Throughput (event/s) | Latency (s/event) |
+| ----------- | ------------ | -------------------- | ----------------- |
+| 50          | 0.0104634762 | 4778.0               | 0.0002092695      |
+| 100         | 0.0148611069 | 6728.0               | 0.0001486111      |
+| 500         | 0.0765211582 | 6534.0               | 0.0001530423      |
+| 1000        | 0.0497426987 | 20103.0              | 0.0000497427      |
+| 5000        | 0.4617681503 | 10827.0              | 0.0000923536      |
+| 10000       | 0.6149528027 | 16261.0              | 0.0000614953      |
+| **Average** | -            | **10871.0**          | **0.0001190858**  |
+
+Berdasarkan hasil evaluasi performa didapati bahwa berdasarkan throughput maupun juga latency, batched event lebih baik. Alasannya adalah karena pada single event, publisher harus mengirim satu-persatu request ke POST `/publish` yang dimana terdapat bottleneck HTTP roundtrip sebanyak jumlah event yang dikirim. Sedangkan, untuk setiap kasus batched HTTP roundtrip hanya dilakukan sekali. Dari evaluasi ini dapat dilihat juga waktu yang diperlukan untuk memasukkan event ke dalam queue tidak signifikan dibanding dengan HTTP roundtrip.
 
 ## Keterkaitan ke BAB 1-7
 
@@ -61,6 +92,8 @@ Pada log aggregator, kesalahan-kesalahan yang dapat terjadi dapat diklasifikasik
 Eventual consistency adalah kejadian dimana jika tidak ada update untuk waktu yang lama, semua replika akan menjadi konsisten secara gradual, yaitu memiliki data yang sama (Steen & Tanenbaum, 2023). Pada kasus log aggregator, eventual consistency menjamin semua service/node memiliki data yang konsisten. Saat banyak event masuk dalam queue tentu saja event tidak diproses secara instan dan membutuhkan waktu, sehingga dedup store tidak akan konsisten pada awalnya dan akan konsisten setelah semua event telah diproses. Eventual consistency ini juga terjadi pada response untuk route statistik GET /stats dengan alasan yang sama. Data konsisten juga mengimplikasikan state yang konsisten. Pada log aggregator, state yang konsisten akan memastikan dengan pengiriman event yang sama akan mencapai state yang sama juga. Untuk itulah, consumer pada log aggregator harus bersifat idempotent. Deduplication memiliki peran yang besar dalam idempotent consumer dimana event duplikat tidak akan diproses sehingga state tidak akan berubah. Dapat disimpulkan bahwa idempotent consumer dan deduplication pada log aggregator membantu sistem meraih konsistensi.
 
 ### T8: Metrik Evaluasi dan Keputusan Desain
+
+Metrik yang baik untuk dijadikan bahan evaluasi performa pada kasus ini adalah throughput dan latency. Seperti yang disebutkan pada (Steen & Tanenbaum, 2023): "Yang kita pedulikan adalah waktu response R: berapa lama waktu yang dibutuhkan sebelum layanan memproses sebuah request, termasuk waktu dalam queue. Dengan tujuan itu, kita perlu rata-rata throughput" dimana queue yang dimaksud di sini adalah request queue secara umum. Untuk latency, pada buku (Steen & Tanenbaum, 2023) saja terdapat 35 kali okurens penyebutan kata tersebut. Jelas bahwa latency merupakan masalah yang besar untuk skalabilitas sistem terdistribusi. Untuk meminimalisir waktu response, log aggregator di-desain agar secara langsung mengirim response setelah log event masuk dalam internal queue. Sehingga semakin makin kecil waktu response, semakin tinggi juga jumlah throughput. Memperbolehkan banyak event dikirim sebagai batch juga berpengaruh dalam waktu response. Pemrosesan event dalam internal queue dapat memberikan dampak pada penerimaan request yang secara transitif akan berdampak terhadap response time. Maka dari itu, query SQLite untuk dedup didesain sesimpel mungkin. Keputusan penggunaan SQLite untuk dedup store sendiri diambil karena merupakan file-based database yang mature dan stable.
 
 ## Referensi
 
