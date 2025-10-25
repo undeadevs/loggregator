@@ -98,3 +98,11 @@ Metrik yang baik untuk dijadikan bahan evaluasi performa pada kasus ini adalah t
 ## Referensi
 
 Van Steen, M. dan Tanenbaum, A. S. (2023). Distributed Systems (Edisi ke-4). Amazon Digital Services LLC - Kdp. https://distributed-systems.net
+
+## Lampiran
+
+### Video Demo
+
+[Link](https://youtu.be/u7jfe8qnZZ0)
+
+[![Demo Video](https://img.youtube.com/vi/u7jfe8qnZZ0/0.jpg)](https://youtu.be/u7jfe8qnZZ0)

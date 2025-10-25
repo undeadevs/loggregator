@@ -105,3 +105,9 @@ Endpoint tambahan yang generated dari FastAPI
 - GET `/openapi.json` OpenAPI schema
 - GET `/docs` API docs (Swagger UI)
 - GET `/redoc` API docs (ReDoc)
+
+## Video Demo
+
+[Link](https://youtu.be/u7jfe8qnZZ0)
+
+[![Demo Video](https://img.youtube.com/vi/u7jfe8qnZZ0/0.jpg)](https://youtu.be/u7jfe8qnZZ0)
