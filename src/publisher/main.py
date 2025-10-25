@@ -13,7 +13,7 @@ url = f"http://{os.environ.get("AGGREGATOR_HOST", "localhost")}:{os.environ.get(
 async def main():
     async with aiohttp.ClientSession() as session:
         while True:
-            events = generate_events(5000, 0.2)
+            events = generate_events(5000, 0.2, 1.0)
             start = time()
             await publish_events_sparsed(session, url, events)
             end = time()

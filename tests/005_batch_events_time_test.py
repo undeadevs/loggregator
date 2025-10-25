@@ -33,7 +33,7 @@ def server():
 @pytest.mark.asyncio
 async def test_batch_events_time_10(server):
     async with aiohttp.ClientSession() as session:
-        events = generate_events(10, 0)
+        events = generate_events(10, 0.0, 0.0)
         start_time = time()
         await publish_events_batched(session, f"{endpoint}/publish", events)
         elapsed_time = time() - start_time
@@ -42,7 +42,7 @@ async def test_batch_events_time_10(server):
 @pytest.mark.asyncio
 async def test_batch_events_time_100(server):
     async with aiohttp.ClientSession() as session:
-        events = generate_events(100, 0)
+        events = generate_events(100, 0.0, 0.0)
         start_time = time()
         await publish_events_batched(session, f"{endpoint}/publish", events)
         elapsed_time = time() - start_time

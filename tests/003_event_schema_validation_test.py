@@ -45,7 +45,7 @@ def test_event_schema_validation_missing():
 def test_event_schema_validation_invalid_topic():
     errors = []
     data = {
-        "topic": 100,
+        "topic": "foo.bar.baz.bang.hello.world",
         "event_id": uuid4(),
         "timestamp": datetime.datetime.now(),
         "source": "somewhere",
@@ -55,11 +55,13 @@ def test_event_schema_validation_invalid_topic():
         Event(**data)
     except ValidationError as e:
         errors = e.errors()
+    logger.info(errors[0])
     assert errors[0] == {
-        "type": "string_type", 
+        "type": "string_pattern_mismatch", 
         "loc": ("topic",), 
-        "msg": "Input should be a valid string", 
+        "msg": "String should match pattern '^([a-z_A-Z0-9]+\\.){0,4}[a-z_A-Z0-9]+$'", 
         "input": data["topic"], 
+        "ctx": {"pattern": "^([a-z_A-Z0-9]+\\.){0,4}[a-z_A-Z0-9]+$"},
         "url": errors[0].get("url")
     }
 
