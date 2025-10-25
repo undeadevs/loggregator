@@ -100,5 +100,5 @@ async def test_consistent_stats_events(server):
         for i, topic in enumerate(stats_data["topics"]):
             events_res = await session.get(f"{endpoint}/events?topic={topic}")
             events_data = await events_res.json()
-            assert len(events_data) == 1
-            assert events_data[0]["event_id"]==events[i]["event_id"]
+            assert len(events_data["events"]) == 1
+            assert events_data["events"][0]["event_id"]==str(events[i].event_id)
