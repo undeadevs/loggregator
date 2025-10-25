@@ -35,28 +35,35 @@ docker-compose -f ./docker/compose.yaml up -d `aggregator`
 
 ### Docker (tanpa Compose)
 
-Build service `aggregator`
+**Buat network internal**
+
+```bash
+docker network create --driver bridge aggregatornet
+```
+
+**Build service `aggregator`**
 
 ```bash
 docker build -t undeadevs/loggregator-aggregator --file ./docker/Dockerfile.aggregator .
 ```
 
-Jalankan service `aggregator`
+**Jalankan service `aggregator`**
 
 ```bash
-docker run -p 8002:8002 -d undeadevs/loggregator-aggregator
+docker run -p 8002:8002 --name aggregator --network aggregatornet -d undeadevs/loggregator-aggregator
 ```
 
-Build service `publisher`
+**Build service `publisher`**
 
 ```bash
 docker build -t undeadevs/loggregator-publisher --file ./docker/Dockerfile.publisher .
 ```
 
-Jalankan service `aggregator`
+**Jalankan service `publisher`**
+
 
 ```bash
-docker run -d undeadevs/loggregator-publisher
+docker run --name publisher --network aggregatornet --env "AGGREGATOR_HOST=aggregator" -d undeadevs/loggregator-publisher
 ```
 
 ### Tanpa Docker
